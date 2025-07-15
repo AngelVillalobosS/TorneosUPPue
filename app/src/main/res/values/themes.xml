@@ -1,0 +1,20 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TorneosUPPue" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Personalización del tema claro -->
+    </style>
+
+    <style name="Theme.TorneosUPPue" parent="Base.Theme.TorneosUPPue">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/dark_green</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/secondary_green</item>
+        <item name="colorSecondaryVariant">@color/muted_green</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:windowBackground">@color/dark_bg</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/dark_green</item>
+    </style>
+</resources>

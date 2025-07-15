@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Torneos UPP</string>
+
+    <string name="university_name">Universidad Politécnica de Puebla</string>
+    <string name="menu_teams">Equipos</string>
+    <string name="menu_recent_matches">Partidos Recientes</string>
+    <string name="menu_upcoming_matches">Próximos Partidos</string>
+    <string name="menu_profile">Perfil</string>
+    <string name="menu_logout">Cerrar Sesión</string>
+    <string name="teams_title">Equipos del Torneo</string>
+    <string name="players_title">Jugadores</string>
+    <string name="recent_matches_title">Partidos Recientes</string>
+    <string name="upcoming_matches_title">Próximos Partidos</string>
+    <string name="match_events_title">Eventos del Partido</string>
+    <string name="login_title">Iniciar Sesión</string>
+    <string name="email_hint">Correo electrónico</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="login_button">INICIAR SESIÓN</string>
+    <string name="signup_prompt">¿No tienes cuenta? Regístrate</string>
+    <!-- Strings existentes -->
+    <string name="signup_title">Registro</string>
+    <string name="name_hint">Nombre completo</string>
+    <string name="confirm_password_hint">Confirmar contraseña</string>
+    <string name="signup_button">REGISTRARSE</string>
+    <string name="login_prompt">¿Ya tienes cuenta? Inicia sesión</string>
+<!--    Wasa-->
+    <string name="profile_image_desc">Imagen de perfil</string>
+    <string name="profile_additional_info">Información Adicional</string>
+    <string name="profile_team_label">Equipo:</string>
+    <string name="profile_sport_label">Deporte:</string>
+    <string name="profile_team_role_label">Rol en el equipo:</string>
+    <string name="edit_profile_button">EDITAR PERFIL</string>
+    <string name="change_password_button">CAMBIAR CONTRASEÑA</string>
+<!--    Wasa-->
+    <string name="team_logo_desc">Logo del equipo</string>
+    <string name="menu_actions">Acciones</string>
+<!--    Wasa-->
+    <string name="navigation_drawer_open">Abrir menú de navegación</string>
+    <string name="navigation_drawer_close">Cerrar menú de navegación</string>
+</resources>
