@@ -12,6 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 public class TeamDetailFragment extends Fragment {
 
     private static final String ARG_TEAM = "team";
+
 
     public static TeamDetailFragment newInstance(Team team) {
         TeamDetailFragment fragment = new TeamDetailFragment();
@@ -34,6 +37,7 @@ public class TeamDetailFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         Log.d("NAVIGATION", "TeamDetailFragment.onCreateView");
         View view = inflater.inflate(R.layout.fragment_team_detail, container, false);
+        RecyclerView recyclerView = view.findViewById(R.id.players_list_view);
 
         Bundle args = getArguments();
         if (args != null && args.containsKey(ARG_TEAM)) {
@@ -53,8 +57,9 @@ public class TeamDetailFragment extends Fragment {
                 List<Player> players = getPlayers(team);
 
                 // Configurar adaptador
-                PlayersAdapter adapter = new PlayersAdapter(getActivity(), players);
-                listView.setAdapter(adapter);
+                PlayersAdapter adapter = new PlayersAdapter(players);
+                recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             }
         } else {
             // Manejar caso de argumentos faltantes

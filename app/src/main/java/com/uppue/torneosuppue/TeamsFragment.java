@@ -1,11 +1,9 @@
 package com.uppue.torneosuppue;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -17,65 +15,35 @@ import java.util.List;
 
 public class TeamsFragment extends Fragment {
 
+    private ListView listView;
+    private TeamsAdapter adapter;
+    private List<Team> teamList;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_teams, container, false);
+        listView = view.findViewById(R.id.teams_list_view); // Asegúrate de tener este ID en tu XML
 
-        // Configurar ListView
-        ListView listView = view.findViewById(R.id.teams_list_view);
+        // Lista inicial de equipos (puede venir de Firestore u otra fuente)
+        teamList = new ArrayList<>();
+        teamList.add(new Team("Ingeniería en Sistemas", true, new ArrayList<>(), "Fútbol", R.drawable.logo_sistemas));
+        teamList.add(new Team("Administración", false, new ArrayList<>(), "Básquetbol", R.drawable.logo_admin));
+        // Agrega más equipos si es necesario
 
-        // Obtener lista de equipos
-        List<Team> teams = getTeams();
-
-        // Configurar adaptador
-        TeamsAdapter adapter = new TeamsAdapter(getActivity(), teams);
-        listView.setAdapter(adapter);
-
-        // Configurar clic en elemento
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // Crear el adaptador y asignarlo al ListView
+        adapter = new TeamsAdapter(requireContext(), teamList, new TeamsAdapter.OnTeamStatusChangeListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Team selectedTeam = teams.get(position);
-                TeamDetailFragment fragment = TeamDetailFragment.newInstance(selectedTeam);
-
-                // Navegar usando la MainActivity
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).showFragment(fragment);
-                }
+            public void onStatusChange(Team team, boolean newStatus) {
+                team.setActive(newStatus);
+                // Aquí podrías guardar el nuevo estado en Firestore si lo deseas
             }
         });
 
-        // En TeamsFragment
-listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d("NAVIGATION", "Clic en equipo: " + position);
-        Team selectedTeam = teams.get(position);
-        Log.d("NAVIGATION", "Equipo seleccionado: " + selectedTeam.getName());
-
-        TeamDetailFragment fragment = TeamDetailFragment.newInstance(selectedTeam);
-        Log.d("NAVIGATION", "Fragment creado");
-
-        if (getActivity() instanceof MainActivity) {
-            Log.d("NAVIGATION", "Llamando a showFragment");
-            ((MainActivity) getActivity()).showFragment(fragment);
-        }
-    }
-});
+        listView.setAdapter(adapter);
 
         return view;
     }
-
-    private List<Team> getTeams() {
-        List<Team> teams = new ArrayList<>();
-        teams.add(new Team("Fútbol Soccer", "Ingeniería en Sistemas", R.drawable.ic_soccer));
-        teams.add(new Team("Básquetbol", "Administración", R.drawable.ic_basketball));
-        teams.add(new Team("Voleibol", "Derecho", R.drawable.ic_volleyball));
-        teams.add(new Team("Béisbol", "Contabilidad", R.drawable.ic_baseball));
-        teams.add(new Team("Fútbol Rápido", "Mecatrónica", R.drawable.ic_futsal));
-        return teams;
-    }
-
 }

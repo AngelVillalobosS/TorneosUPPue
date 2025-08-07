@@ -26,7 +26,7 @@ public class MyTeamFragment extends Fragment {
 
     private TextView teamName;
     private RecyclerView playersRecycler;
-    private Player adapter;
+    private PlayersAdapter adapter;
     private View progressContainer;
     private ProgressBar progressBar;
     private TextView teamStatus;
@@ -47,7 +47,7 @@ public class MyTeamFragment extends Fragment {
         
         // Configurar RecyclerView
         playersRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new PlayerAdapter(new ArrayList<>());
+        adapter = new PlayersAdapter(new ArrayList<>());
         playersRecycler.setAdapter(adapter);
         
         // Cargar datos del equipo

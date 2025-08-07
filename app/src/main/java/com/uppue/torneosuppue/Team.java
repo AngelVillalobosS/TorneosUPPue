@@ -9,7 +9,7 @@ public class Team implements Parcelable {
     private String id;
     private String name;
     private boolean active;
-    private List<String> players;
+    private List<Player> players;  // Cambiado de List<String> a List<Player>
     private String sport;
     private int logoResId;
 
@@ -19,7 +19,7 @@ public class Team implements Parcelable {
     }
 
     // Constructor completo
-    public Team(String name, boolean active, List<String> players, String sport, int logoResId) {
+    public Team(String name, boolean active, List<Player> players, String sport, int logoResId) {
         this.name = name;
         this.active = active;
         this.players = players != null ? players : new ArrayList<>();
@@ -32,8 +32,7 @@ public class Team implements Parcelable {
         id = in.readString();
         name = in.readString();
         active = in.readByte() != 0;
-        players = new ArrayList<>();
-        in.readStringList(players);
+        players = in.createTypedArrayList(Player.CREATOR);  // Cambiado para leer lista de Player
         sport = in.readString();
         logoResId = in.readInt();
     }
@@ -60,7 +59,7 @@ public class Team implements Parcelable {
         dest.writeString(id);
         dest.writeString(name);
         dest.writeByte((byte) (active ? 1 : 0));
-        dest.writeStringList(players);
+        dest.writeTypedList(players);  // Cambiado para escribir lista de Player
         dest.writeString(sport);
         dest.writeInt(logoResId);
     }
@@ -75,9 +74,18 @@ public class Team implements Parcelable {
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 
-    public List<String> getPlayers() { return players; }
-    public void setPlayers(List<String> players) {
+    public List<Player> getPlayers() { return players; }  // Devuelve lista de Player
+    public void setPlayers(List<Player> players) {        // Recibe lista de Player
         this.players = players != null ? players : new ArrayList<>();
+    }
+
+    // Método para obtener solo los nombres de los jugadores (si lo necesitas)
+    public List<String> getPlayerNames() {
+        List<String> names = new ArrayList<>();
+        for (Player player : players) {
+            names.add(player.getName());
+        }
+        return names;
     }
 
     public String getSport() { return sport; }

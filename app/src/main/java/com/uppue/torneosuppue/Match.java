@@ -4,6 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Match implements Parcelable {
+    private String time, notes;
+    private String referee;
+    private String location;
+    private boolean isFinal, played;
     private String id;
     private String teamId;
     private String opponent;
@@ -20,21 +24,22 @@ public class Match implements Parcelable {
     public Match() {}
 
     // Constructor completo
-    public Match(String id, String teamId, String opponent, String date,
-                 String result, boolean reported, String sport,
-                 String team1, String team2, String score, boolean completed) {
-        this.id = id;
-        this.teamId = teamId;
-        this.opponent = opponent;
-        this.date = date;
-        this.result = result;
-        this.reported = reported;
+    public Match(String sport, String team1, String team2, String score, String date, boolean isFinal) {
         this.sport = sport;
         this.team1 = team1;
         this.team2 = team2;
         this.score = score;
-        this.completed = completed;
+        this.date = date;
+        this.isFinal = isFinal;
+
+        // Puedes inicializar los campos restantes como vacíos o valores predeterminados
+        this.location = "";
+        this.referee = "";
+        this.time = "";
+        this.notes = "";
+        this.played = true;
     }
+
 
     // Constructor desde Parcel
     protected Match(Parcel in) {

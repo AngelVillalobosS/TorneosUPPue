@@ -1,59 +1,65 @@
-// src/main/java/com/example/torneosupp/PlayersAdapter.java
 package com.uppue.torneosuppue;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class PlayersAdapter extends ArrayAdapter<Player> {
+public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.PlayerViewHolder> {
 
-    private final Context context;
     private final List<Player> players;
 
-    public PlayersAdapter(Context context, List<Player> players) {
-        super(context, R.layout.item_player, players);
-        this.context = context;
+    public PlayersAdapter(List<Player> players) {
         this.players = players;
     }
 
     @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        ViewHolder holder;
+    public PlayerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_player, parent, false);
+        return new PlayerViewHolder(view);
+    }
 
-        if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(R.layout.item_player, parent, false);
-
-            holder = new ViewHolder();
-            holder.playerName = convertView.findViewById(R.id.player_name);
-            holder.playerPosition = convertView.findViewById(R.id.player_position);
-            holder.playerNumber = convertView.findViewById(R.id.player_number);
-
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
+    @Override
+    public void onBindViewHolder(@NonNull PlayerViewHolder holder, int position) {
         Player player = players.get(position);
         holder.playerName.setText(player.getName());
         holder.playerPosition.setText(player.getPosition());
         holder.playerNumber.setText("#" + player.getNumber());
-
-        return convertView;
     }
 
-    static class ViewHolder {
+    @Override
+    public int getItemCount() {
+        return players.size();
+    }
+
+    public static class PlayerViewHolder extends RecyclerView.ViewHolder {
         TextView playerName;
         TextView playerPosition;
         TextView playerNumber;
+
+        public PlayerViewHolder(@NonNull View itemView) {
+            super(itemView);
+            playerName = itemView.findViewById(R.id.player_name);
+            playerPosition = itemView.findViewById(R.id.player_position);
+            playerNumber = itemView.findViewById(R.id.player_number);
+        }
+    }
+
+    // Método para actualizar los datos
+    public void updatePlayers(List<Player> newPlayers) {
+        players.clear();
+        players.addAll(newPlayers);
+        notifyDataSetChanged();
+    }
+
+    // Método setPlayers como alias de updatePlayers
+    public void setPlayers(List<Player> newPlayers) {
+        updatePlayers(newPlayers);
     }
 }

@@ -1,5 +1,11 @@
 <resources>
-    <string name="app_name">Torneos UPP</string>
+    <string name="app_name">Torneos UPPue</string>
+
+<!--  Datos para el inicio de sesión  -->
+    <string name="in_name">Nombre Completo</string>
+    <string name="in_email">Ingresar Correo</string>
+    <string name="in_psswrd">Ingresar Contraseña</string>
+    <string name="ver_psswrd">Verificar contraseña</string>
 
     <string name="university_name">Universidad Politécnica de Puebla</string>
     <string name="menu_teams">Equipos</string>

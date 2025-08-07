@@ -3,6 +3,7 @@ package com.uppue.torneosuppue;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,8 +36,7 @@ public class SignUpFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
 
         // Inicializar Firebase
@@ -60,38 +60,45 @@ public class SignUpFragment extends Fragment {
             String passwordStr = password.getText().toString().trim();
             String confirmPasswordStr = confirmPassword.getText().toString().trim();
 
-            // Validar campos
+             // Validar nombre (solo letras, espacios, acentos, capitalizado)
             if (TextUtils.isEmpty(nameStr)) {
                 name.setError("Nombre requerido");
                 return;
             }
-
+            if (!nameStr.matches("^[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ ]*$")) {
+                name.setError("Solo letras y espacios. Debe iniciar con mayúscula");
+                return;
+            }
+                // Validar correo electrónico (formato básico)
             if (TextUtils.isEmpty(emailStr)) {
                 email.setError("Email requerido");
                 return;
             }
-
+            if (!Patterns.EMAIL_ADDRESS.matcher(emailStr).matches()) {
+                email.setError("Correo electrónico no válido");
+                return;
+            }
+                // Validar contraseña (mínimo 8, al menos una mayúscula, una minúscula y un número)
             if (TextUtils.isEmpty(passwordStr)) {
                 password.setError("Contraseña requerida");
                 return;
             }
-
-            if (passwordStr.length() < 6) {
-                password.setError("La contraseña debe tener al menos 6 caracteres");
+            if (!passwordStr.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
+                password.setError("Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número");
                 return;
             }
-
+                // Confirmar contraseña
             if (!passwordStr.equals(confirmPasswordStr)) {
                 confirmPassword.setError("Las contraseñas no coinciden");
                 return;
             }
-
-            // Mostrar progreso
+                // Mostrar progreso
             progressBar.setVisibility(View.VISIBLE);
             signupButton.setEnabled(false);
 
-            // Registrar usuario
+             // Registrar usuario
             registerUser(nameStr, emailStr, passwordStr);
+
         });
 
         loginLink.setOnClickListener(v -> {

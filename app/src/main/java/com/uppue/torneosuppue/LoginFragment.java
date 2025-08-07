@@ -64,7 +64,7 @@ public class LoginFragment extends Fragment {
             }
 
             if (passwordStr.length() < 6) {
-                password.setError("La contraseña debe tener al menos 6 caracteres");
+                password.setError("La contraseña debe tener al menos 8 caracteres");
                 return;
             }
 
@@ -93,13 +93,7 @@ public class LoginFragment extends Fragment {
                         // Login exitoso
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            // Verificar si el email está verificado
-                            if (!user.isEmailVerified()) {
-                                Toast.makeText(getContext(),
-                                        "Por favor verifica tu email antes de iniciar sesión",
-                                        Toast.LENGTH_LONG).show();
-                                return;
-                            }
+                            // OMITIDA la verificación de email
 
                             // Obtener rol del usuario
                             getUserRole(user.getUid());
