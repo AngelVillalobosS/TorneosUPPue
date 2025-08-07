@@ -2,21 +2,39 @@ package com.uppue.torneosuppue;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Team implements Parcelable {
-    private String sport;
+    private String id;
     private String name;
+    private boolean active;
+    private List<String> players;
+    private String sport;
     private int logoResId;
 
-    public Team(String sport, String name, int logoResId) {
-        this.sport = sport;
+    // Constructor vacío para Firestore
+    public Team() {
+        players = new ArrayList<>();
+    }
+
+    // Constructor completo
+    public Team(String name, boolean active, List<String> players, String sport, int logoResId) {
         this.name = name;
+        this.active = active;
+        this.players = players != null ? players : new ArrayList<>();
+        this.sport = sport;
         this.logoResId = logoResId;
     }
 
+    // Constructor Parcel
     protected Team(Parcel in) {
-        sport = in.readString();
+        id = in.readString();
         name = in.readString();
+        active = in.readByte() != 0;
+        players = new ArrayList<>();
+        in.readStringList(players);
+        sport = in.readString();
         logoResId = in.readInt();
     }
 
@@ -39,13 +57,32 @@ public class Team implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(sport);
+        dest.writeString(id);
         dest.writeString(name);
+        dest.writeByte((byte) (active ? 1 : 0));
+        dest.writeStringList(players);
+        dest.writeString(sport);
         dest.writeInt(logoResId);
     }
 
-    // Getters
-    public String getSport() { return sport; }
+    // Getters y setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
+    public List<String> getPlayers() { return players; }
+    public void setPlayers(List<String> players) {
+        this.players = players != null ? players : new ArrayList<>();
+    }
+
+    public String getSport() { return sport; }
+    public void setSport(String sport) { this.sport = sport; }
+
     public int getLogoResId() { return logoResId; }
+    public void setLogoResId(int logoResId) { this.logoResId = logoResId; }
 }

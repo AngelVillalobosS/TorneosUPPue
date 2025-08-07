@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.uppue.torneosuppue" />
+                  <option name="mobileSdkAppId" value="1:386795799943:android:4fb892be5a363d20117f22" />
+                  <option name="projectId" value="torneosupp-8a8c4" />
+                  <option name="projectNumber" value="386795799943" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

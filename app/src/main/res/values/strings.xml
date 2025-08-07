@@ -37,4 +37,15 @@
 <!--    Wasa-->
     <string name="navigation_drawer_open">Abrir menú de navegación</string>
     <string name="navigation_drawer_close">Cerrar menú de navegación</string>
+
+    <string name="select_match_prompt">Seleccionar partido</string>
+
+<!--    Match Results-->
+    <string name="select_result_prompt">Seleccionar resultado</string>
+
+    <string-array name="result_options">
+        <item>Victoria</item>
+        <item>Derrota</item>
+        <item>Empate</item>
+    </string-array>
 </resources>

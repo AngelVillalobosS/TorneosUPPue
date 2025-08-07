@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_teams"
+            android:title="Equipos"
+            android:icon="@drawable/ic_teams"/>
+            
+        <item
+            android:id="@+id/nav_my_team"
+            android:title="Mi Equipo"
+            android:icon="@drawable/ic_team"/>
+            
+        <item
+            android:id="@+id/nav_report_result"
+            android:title="Reportar Resultado"
+            android:icon="@drawable/ic_report"/>
+            
+        <item
+            android:id="@+id/nav_recent_matches"
+            android:title="Partidos Recientes"
+            android:icon="@drawable/ic_history"/>
+            
+        <item
+            android:id="@+id/nav_upcoming_matches"
+            android:title="Próximos Partidos"
+            android:icon="@drawable/ic_calendar"/>
+    </group>
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_profile"
+            android:title="Perfil"
+            android:icon="@drawable/ic_profile"/>
+            
+        <item
+            android:id="@+id/nav_logout"
+            android:title="Cerrar Sesión"
+            android:icon="@drawable/ic_logout"/>
+    </group>
+</menu>

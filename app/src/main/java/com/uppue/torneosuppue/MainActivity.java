@@ -12,18 +12,24 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
+    NavigationView navigationView;
     private Toolbar toolbar;
     private ActionBarDrawerToggle toggle;
+    String userRole; // Almacenará el rol del usuario
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +56,63 @@ public class MainActivity extends AppCompatActivity
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Mostrar fragmento inicial
-        if (savedInstanceState == null) {
-            showFragment(new TeamsFragment());
-            navigationView.setCheckedItem(R.id.nav_teams);
+        // Verificar autenticación y rol
+        checkAuthAndRole();
+    }
+
+    private void checkAuthAndRole() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            // Usuario no autenticado, mostrar login
+            showFragment(new LoginFragment());
+            navigationView.setVisibility(View.GONE); // Ocultar menú
+        } else {
+            // Obtener rol del usuario
+            fetchUserRole();
         }
+    }
+
+    private void fetchUserRole() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        FirebaseFirestore.getInstance().collection("users")
+            .document(user.getUid())
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    userRole = documentSnapshot.getString("role");
+                    setupNavigationMenu(); // Configurar menú según rol
+
+                    // Mostrar fragmento inicial
+                    if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                        showFragment(new TeamsFragment());
+                        navigationView.setCheckedItem(R.id.nav_teams);
+                    }
+                } else {
+                    Toast.makeText(this, "Perfil de usuario no encontrado", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(this, "Error al obtener rol: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+    }
+
+    void setupNavigationMenu() {
+        Menu menu = navigationView.getMenu();
+        menu.clear(); // Limpiar menú existente
+
+        // Inflar menú según rol
+        if ("admin".equals(userRole)) {
+            navigationView.inflateMenu(R.menu.admin_nav_menu);
+        } else if ("captain".equals(userRole)) {
+            navigationView.inflateMenu(R.menu.captain_nav_menu);
+        } else {
+            // Rol por defecto si no está definido
+            navigationView.inflateMenu(R.menu.default_nav_menu);
+        }
+
+        navigationView.setVisibility(View.VISIBLE); // Mostrar menú
     }
 
     // Método público para mostrar fragments
@@ -85,6 +143,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
+        // Menú compartido por ambos roles
         if (id == R.id.nav_teams) {
             showFragment(new TeamsFragment());
         } else if (id == R.id.nav_recent_matches) {
@@ -94,13 +153,32 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_profile) {
             showFragment(new ProfileFragment());
         } else if (id == R.id.nav_logout) {
-            Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
-            showFragment(new LoginFragment());
-            navigationView.setCheckedItem(-1); // Desmarcar todos los items
+            logout();
+        }
+
+        // Menú específico de admin
+        else if (id == R.id.nav_manage_teams) {
+            showFragment(new ManageTeamsFragment());
+        }
+
+        // Menú específico de capitán
+        else if (id == R.id.nav_my_team) {
+            showFragment(new MyTeamFragment());
+        } else if (id == R.id.nav_report_result) {
+            showFragment(new ReportResultFragment());
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+        // Limpiar y mostrar login
+        navigationView.setVisibility(View.GONE);
+        navigationView.setCheckedItem(-1);
+        showFragment(new LoginFragment());
+        Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
     }
 
     @Override
