@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignUpFragment">
+    android:background="@color/dark_bg"
+    tools:context=".LoginActivity">
 
+    <!-- ScrollView principal -->
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/dark_bg"
+        android:id="@+id/scrollView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:fillViewport="true"
-        android:padding="24dp">
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -30,7 +38,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/signup_title"
+                android:text="@string/login_title"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="24sp"
@@ -43,25 +51,11 @@
                 app:boxBackgroundColor="@color/muted_green">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/name_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/in_name"
-                    android:textColor="@color/white" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:boxBackgroundColor="@color/muted_green">
-
-                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
-                    android:hint="@string/in_email"
+                    android:hint="@string/email_hint"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -77,42 +71,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:hint="@string/in_psswrd"
-                    android:textColor="@color/white" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:boxBackgroundColor="@color/muted_green"
-                app:passwordToggleEnabled="true">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/confirm_password_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:hint="@string/ver_psswrd"
+                    android:hint="@string/password_hint"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
-                android:id="@+id/signup_button"
+                android:id="@+id/login_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:backgroundTint="@color/primary_green"
-                android:text="@string/signup_button"
+                android:text="@string/login_button"
                 android:textColor="@color/black" />
 
             <TextView
-                android:id="@+id/login_link"
+                android:id="@+id/signup_link"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="@string/login_prompt"
+                android:text="@string/signup_prompt"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -121,10 +99,14 @@
     <!-- ProgressBar con fondo semitransparente -->
     <RelativeLayout
         android:id="@+id/progressContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="#80000000"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -134,4 +116,4 @@
             android:indeterminateTint="@color/primary_green" />
     </RelativeLayout>
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

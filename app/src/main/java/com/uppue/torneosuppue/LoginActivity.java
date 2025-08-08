@@ -1,58 +1,70 @@
 package com.uppue.torneosuppue;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class LoginFragment extends Fragment {
+public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private ProgressBar progressBar;
     private Button loginButton;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Habilitar EdgeToEdge (diseño de borde a borde)
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_login);  // Asegúrate de usar activity_login
+
+        // Configurar insets (márgenes para evitar superposición con barras del sistema)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         // Inicializar Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        EditText email = view.findViewById(R.id.email_input);
-        EditText password = view.findViewById(R.id.password_input);
-        loginButton = view.findViewById(R.id.login_button);
-        TextView signupLink = view.findViewById(R.id.signup_link);
-        progressBar = view.findViewById(R.id.progressBar);
+        // Obtener referencias a las vistas
+        EditText email = findViewById(R.id.email_input);
+        EditText password = findViewById(R.id.password_input);
+        loginButton = findViewById(R.id.login_button);
+        TextView signupLink = findViewById(R.id.signup_link);
+        progressBar = findViewById(R.id.progressBar);
 
         // Ocultar progress bar inicialmente
         progressBar.setVisibility(View.GONE);
 
+        // Configurar listener para el botón de login
         loginButton.setOnClickListener(v -> {
             String emailStr = email.getText().toString().trim();
             String passwordStr = password.getText().toString().trim();
 
+            // Validaciones
             if (emailStr.isEmpty()) {
                 email.setError("Email requerido");
                 return;
@@ -63,12 +75,12 @@ public class LoginFragment extends Fragment {
                 return;
             }
 
-            if (passwordStr.length() < 6) {
+            if (passwordStr.length() < 8) {  // Cambiado de 6 a 8 caracteres mínimo
                 password.setError("La contraseña debe tener al menos 8 caracteres");
                 return;
             }
 
-            // Mostrar progreso
+            // Mostrar progreso y deshabilitar botón
             progressBar.setVisibility(View.VISIBLE);
             loginButton.setEnabled(false);
 
@@ -76,16 +88,16 @@ public class LoginFragment extends Fragment {
             loginUser(emailStr, passwordStr);
         });
 
+        // Configurar listener para el enlace de registro
         signupLink.setOnClickListener(v -> {
-            ((MainActivity) requireActivity()).showFragment(new SignUpFragment());
+            // Navegar a SignUpActivity
+            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
         });
-
-        return view;
     }
 
     private void loginUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(requireActivity(), task -> {
+                .addOnCompleteListener(this, task -> {
                     progressBar.setVisibility(View.GONE);
                     loginButton.setEnabled(true);
 
@@ -93,10 +105,15 @@ public class LoginFragment extends Fragment {
                         // Login exitoso
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            // OMITIDA la verificación de email
-
-                            // Obtener rol del usuario
-                            getUserRole(user.getUid());
+                            // Verificar si el correo está verificado
+                            if (user.isEmailVerified()) {
+                                // Obtener rol del usuario
+                                getUserRole(user.getUid());
+                            } else {
+                                Toast.makeText(LoginActivity.this,
+                                        "Por favor verifica tu correo electrónico antes de iniciar sesión",
+                                        Toast.LENGTH_LONG).show();
+                            }
                         }
                     } else {
                         // Error en login
@@ -104,7 +121,7 @@ public class LoginFragment extends Fragment {
                         if (task.getException() != null) {
                             errorMessage = task.getException().getMessage();
                         }
-                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                         Log.e("LOGIN", "Error en login: ", task.getException());
                     }
                 });
@@ -119,16 +136,14 @@ public class LoginFragment extends Fragment {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         String role = document.getString("role");
-
-                        // Navegar al fragmento principal
                         navigateToMainApp(role);
                     } else {
-                        Toast.makeText(getContext(),
+                        Toast.makeText(LoginActivity.this,
                                 "Perfil de usuario no encontrado",
                                 Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(),
+                    Toast.makeText(LoginActivity.this,
                             "Error al obtener información del usuario",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -136,26 +151,14 @@ public class LoginFragment extends Fragment {
     }
 
     private void navigateToMainApp(String role) {
-        // Obtener referencia a MainActivity
-        if (getActivity() instanceof MainActivity) {
-            MainActivity mainActivity = (MainActivity) getActivity();
-
-            // Actualizar rol en MainActivity
-            mainActivity.userRole = role;
-
-            // Configurar menú de navegación
-            mainActivity.setupNavigationMenu();
-
-            // Navegar a la pantalla principal
-            mainActivity.showFragment(new TeamsFragment());
-
-            // Marcar el ítem del menú como seleccionado
-            mainActivity.navigationView.setCheckedItem(R.id.nav_teams);
-        }
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.putExtra("userRole", role);
+        startActivity(intent);
+        finish(); // Cierra LoginActivity para que no pueda volver atrás
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         // Verificar si el usuario ya está logueado
         FirebaseUser currentUser = mAuth.getCurrentUser();

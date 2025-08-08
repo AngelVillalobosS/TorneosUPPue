@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             // Usuario no autenticado, mostrar login
-            showFragment(new LoginFragment());
+            showFragment(new LoginActivity());
             navigationView.setVisibility(View.GONE); // Ocultar menú
         } else {
             // Obtener rol del usuario
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         // Limpiar y mostrar login
         navigationView.setVisibility(View.GONE);
         navigationView.setCheckedItem(-1);
-        showFragment(new LoginFragment());
+        showFragment(new LoginActivity());
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
     }
 
