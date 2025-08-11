@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -36,6 +37,24 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Verificar autenticación antes de inicializar la UI
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || !user.isEmailVerified()) {
+            redirectToLogin();
+            return;
+        }
+
+        // Configurar UI solo si el usuario está autenticado
+        initializeUI();
+        fetchUserRole();
+    }
+
+    private void redirectToLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish(); // Cierra MainActivity para que no quede en el historial
+    }
+
+    private void initializeUI() {
         // Configurar toolbar
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -55,21 +74,6 @@ public class MainActivity extends AppCompatActivity
         );
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-
-        // Verificar autenticación y rol
-        checkAuthAndRole();
-    }
-
-    private void checkAuthAndRole() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            // Usuario no autenticado, mostrar login
-            showFragment(new LoginActivity());
-            navigationView.setVisibility(View.GONE); // Ocultar menú
-        } else {
-            // Obtener rol del usuario
-            fetchUserRole();
-        }
     }
 
     private void fetchUserRole() {
@@ -77,54 +81,47 @@ public class MainActivity extends AppCompatActivity
         if (user == null) return;
 
         FirebaseFirestore.getInstance().collection("users")
-            .document(user.getUid())
-            .get()
-            .addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    userRole = documentSnapshot.getString("role");
-                    setupNavigationMenu(); // Configurar menú según rol
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        userRole = documentSnapshot.getString("role");
+                        setupNavigationMenu();
 
-                    // Mostrar fragmento inicial
-                    if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                        // Mostrar fragmento inicial
                         showFragment(new TeamsFragment());
                         navigationView.setCheckedItem(R.id.nav_teams);
+                    } else {
+                        Toast.makeText(this, "Perfil de usuario no encontrado", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(this, "Perfil de usuario no encontrado", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .addOnFailureListener(e -> {
-                Toast.makeText(this, "Error al obtener rol: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error al obtener rol: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     void setupNavigationMenu() {
         Menu menu = navigationView.getMenu();
-        menu.clear(); // Limpiar menú existente
+        menu.clear();
 
-        // Inflar menú según rol
         if ("admin".equals(userRole)) {
             navigationView.inflateMenu(R.menu.admin_nav_menu);
         } else if ("captain".equals(userRole)) {
             navigationView.inflateMenu(R.menu.captain_nav_menu);
         } else {
-            // Rol por defecto si no está definido
             navigationView.inflateMenu(R.menu.default_nav_menu);
         }
 
-        navigationView.setVisibility(View.VISIBLE); // Mostrar menú
+        navigationView.setVisibility(View.VISIBLE);
     }
 
-    // Método público para mostrar fragments
     public void showFragment(Fragment fragment) {
         Log.d("NAVIGATION", "Mostrando fragment: " + fragment.getClass().getSimpleName());
-        // Limpiar back stack
         clearBackStack();
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
 
-        // Solo añadir al back stack si no es el fragmento inicial
         if (!(fragment instanceof TeamsFragment)) {
             transaction.addToBackStack(null);
         }
@@ -143,7 +140,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        // Menú compartido por ambos roles
         if (id == R.id.nav_teams) {
             showFragment(new TeamsFragment());
         } else if (id == R.id.nav_recent_matches) {
@@ -154,15 +150,9 @@ public class MainActivity extends AppCompatActivity
             showFragment(new ProfileFragment());
         } else if (id == R.id.nav_logout) {
             logout();
-        }
-
-        // Menú específico de admin
-        else if (id == R.id.nav_manage_teams) {
+        } else if (id == R.id.nav_manage_teams) {
             showFragment(new ManageTeamsFragment());
-        }
-
-        // Menú específico de capitán
-        else if (id == R.id.nav_my_team) {
+        } else if (id == R.id.nav_my_team) {
             showFragment(new MyTeamFragment());
         } else if (id == R.id.nav_report_result) {
             showFragment(new ReportResultFragment());
@@ -174,10 +164,7 @@ public class MainActivity extends AppCompatActivity
 
     private void logout() {
         FirebaseAuth.getInstance().signOut();
-        // Limpiar y mostrar login
-        navigationView.setVisibility(View.GONE);
-        navigationView.setCheckedItem(-1);
-        showFragment(new LoginActivity());
+        redirectToLogin();
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
     }
 
@@ -193,6 +180,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        toggle.syncState();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            toggle.syncState();
+        }
     }
 }

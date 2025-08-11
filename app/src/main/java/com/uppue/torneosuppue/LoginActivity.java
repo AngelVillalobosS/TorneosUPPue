@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,6 +20,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,145 +29,212 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseFirestore db;
     private ProgressBar progressBar;
     private Button loginButton;
+    private EditText emailInput, passwordInput;
+    private TextView signupLink;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Habilitar EdgeToEdge (diseño de borde a borde)
+        // Habilitar diseño EdgeToEdge
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login);  // Asegúrate de usar activity_login
+        setContentView(R.layout.activity_login);
 
-        // Configurar insets (márgenes para evitar superposición con barras del sistema)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // Configurar insets para la vista principal
+        View mainView = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Inicializar Firebase
+        // Inicializar Firebase Authentication y Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Configurar AuthStateListener para manejar cambios en la autenticación
+        authStateListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null && user.isEmailVerified()) {
+                // Usuario ya autenticado y verificado, obtener rol
+                fetchUserRole(user.getUid());
+            }
+        };
+
         // Obtener referencias a las vistas
-        EditText email = findViewById(R.id.email_input);
-        EditText password = findViewById(R.id.password_input);
+        emailInput = findViewById(R.id.email_input);
+        passwordInput = findViewById(R.id.password_input);
         loginButton = findViewById(R.id.login_button);
-        TextView signupLink = findViewById(R.id.signup_link);
+        signupLink = findViewById(R.id.signup_link);
         progressBar = findViewById(R.id.progressBar);
 
-        // Ocultar progress bar inicialmente
-        progressBar.setVisibility(View.GONE);
-
-        // Configurar listener para el botón de login
-        loginButton.setOnClickListener(v -> {
-            String emailStr = email.getText().toString().trim();
-            String passwordStr = password.getText().toString().trim();
-
-            // Validaciones
-            if (emailStr.isEmpty()) {
-                email.setError("Email requerido");
-                return;
-            }
-
-            if (passwordStr.isEmpty()) {
-                password.setError("Contraseña requerida");
-                return;
-            }
-
-            if (passwordStr.length() < 8) {  // Cambiado de 6 a 8 caracteres mínimo
-                password.setError("La contraseña debe tener al menos 8 caracteres");
-                return;
-            }
-
-            // Mostrar progreso y deshabilitar botón
-            progressBar.setVisibility(View.VISIBLE);
-            loginButton.setEnabled(false);
-
-            // Autenticar con Firebase
-            loginUser(emailStr, passwordStr);
-        });
-
-        // Configurar listener para el enlace de registro
-        signupLink.setOnClickListener(v -> {
-            // Navegar a SignUpActivity
-            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-        });
+        // Configurar listeners
+        setupListeners();
     }
 
-    private void loginUser(String email, String password) {
+    private void setupListeners() {
+        loginButton.setOnClickListener(v -> attemptLogin());
+        signupLink.setOnClickListener(v -> navigateToSignUp());
+    }
+
+    private void attemptLogin() {
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
+
+        if (!validateInput(email, password)) {
+            return;
+        }
+
+        showProgress(true);
+        authenticateUser(email, password);
+    }
+
+    private boolean validateInput(String email, String password) {
+        boolean isValid = true;
+
+        if (email.isEmpty()) {
+            emailInput.setError("Email requerido");
+            isValid = false;
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailInput.setError("Correo electrónico no válido");
+            isValid = false;
+        }
+
+        if (password.isEmpty()) {
+            passwordInput.setError("Contraseña requerida");
+            isValid = false;
+        } else if (password.length() < 8) {
+            passwordInput.setError("Debe tener al menos 8 caracteres");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private void showProgress(boolean show) {
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        loginButton.setEnabled(!show);
+        emailInput.setEnabled(!show);
+        passwordInput.setEnabled(!show);
+    }
+
+    private void authenticateUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    progressBar.setVisibility(View.GONE);
-                    loginButton.setEnabled(true);
-
                     if (task.isSuccessful()) {
-                        // Login exitoso
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            // Verificar si el correo está verificado
-                            if (user.isEmailVerified()) {
-                                // Obtener rol del usuario
-                                getUserRole(user.getUid());
-                            } else {
-                                Toast.makeText(LoginActivity.this,
-                                        "Por favor verifica tu correo electrónico antes de iniciar sesión",
-                                        Toast.LENGTH_LONG).show();
-                            }
-                        }
+                        handleLoginSuccess();
                     } else {
-                        // Error en login
-                        String errorMessage = "Error en autenticación";
-                        if (task.getException() != null) {
-                            errorMessage = task.getException().getMessage();
-                        }
-                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-                        Log.e("LOGIN", "Error en login: ", task.getException());
+                        handleLoginFailure(task.getException());
                     }
                 });
     }
 
-    private void getUserRole(String userId) {
+    private void handleLoginSuccess() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            if (user.isEmailVerified()) {
+                fetchUserRole(user.getUid());
+            } else {
+                showProgress(false);
+                Toast.makeText(LoginActivity.this,
+                        "Por favor verifica tu correo electrónico antes de iniciar sesión",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void handleLoginFailure(Exception exception) {
+        showProgress(false);
+
+        String errorMessage = "Error en autenticación";
+        if (exception != null) {
+            if (exception instanceof FirebaseAuthInvalidUserException) {
+                errorMessage = "No existe cuenta con este correo electrónico";
+            } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+                errorMessage = "Credenciales inválidas. Verifica tu correo y contraseña";
+            } else {
+                errorMessage = exception.getMessage();
+            }
+            Log.e("LOGIN", "Error en login: " + errorMessage, exception);
+        }
+
+        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+    }
+
+    private void fetchUserRole(String userId) {
         db.collection("users")
-            .document(userId)
-            .get()
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful() && task.getResult() != null) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        String role = document.getString("role");
-                        navigateToMainApp(role);
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            String role = document.getString("role");
+                            if (role != null && !role.isEmpty()) {
+                                navigateToMainApp(role);
+                            } else {
+                                handleRoleNotFound();
+                            }
+                        } else {
+                            handleRoleNotFound();
+                        }
                     } else {
-                        Toast.makeText(LoginActivity.this,
-                                "Perfil de usuario no encontrado",
-                                Toast.LENGTH_SHORT).show();
+                        handleFirestoreError(task.getException());
                     }
-                } else {
-                    Toast.makeText(LoginActivity.this,
-                            "Error al obtener información del usuario",
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
+                });
+    }
+
+    private void handleRoleNotFound() {
+        showProgress(false);
+        Toast.makeText(LoginActivity.this,
+                "Perfil de usuario no encontrado",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void handleFirestoreError(Exception exception) {
+        showProgress(false);
+        String error = "Error al obtener información del usuario";
+        if (exception != null) {
+            error += ": " + exception.getMessage();
+            Log.e("FIRESTORE", "Error en Firestore", exception);
+        }
+        Toast.makeText(LoginActivity.this, error, Toast.LENGTH_SHORT).show();
     }
 
     private void navigateToMainApp(String role) {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("userRole", role);
         startActivity(intent);
-        finish(); // Cierra LoginActivity para que no pueda volver atrás
+        finish(); // Cierra esta actividad para evitar volver atrás
+    }
+
+    private void navigateToSignUp() {
+        startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Verificar si el usuario ya está logueado
+        // Registrar el AuthStateListener
+        mAuth.addAuthStateListener(authStateListener);
+
+        // Verificar si el usuario ya está autenticado
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null && currentUser.isEmailVerified()) {
-            // Usuario ya autenticado, obtener rol
-            getUserRole(currentUser.getUid());
+            fetchUserRole(currentUser.getUid());
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Remover el AuthStateListener cuando la actividad no está visible
+        if (authStateListener != null) {
+            mAuth.removeAuthStateListener(authStateListener);
         }
     }
 }
