@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.TorneosUPPue" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Deshabilitar modo oscuro forzado -->
+        <item name="android:forceDarkAllowed">false</item>
+
         <!-- Personalización del tema claro -->
     </style>
 
@@ -16,5 +19,12 @@
         <item name="colorOnSecondary">@color/white</item>
         <item name="android:windowBackground">@color/dark_bg</item>
         <item name="android:statusBarColor" tools:targetApi="l">@color/dark_green</item>
+    </style>
+
+    <!-- Tema para Splash Screen -->
+    <style name="Theme.AppStarting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/dark_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_logo_upp</item>
+        <item name="postSplashScreenTheme">@style/Theme.TorneosUPPue</item>
     </style>
 </resources>
