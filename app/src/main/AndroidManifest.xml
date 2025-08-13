@@ -14,7 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TorneosUPPue"
-        tools:targetApi="31">
+        tools:targetApi="33">
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -36,7 +36,7 @@
             android:theme="@style/Theme.TorneosUPPue" /> <!-- Actividad Principal -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="true" />
     </application>
 
 </manifest>

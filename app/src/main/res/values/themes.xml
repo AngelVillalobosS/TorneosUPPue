@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.TorneosUPPue" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Deshabilitar modo oscuro forzado -->
-        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
 
         <!-- Personalización del tema claro -->
     </style>

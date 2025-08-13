@@ -7,14 +7,4 @@
     android:layout_height="match_parent"
     tools:context=".SplashActivity">
 
-    <activity
-    android:name=".SplashActivity"
-    android:exported="true"
-    android:theme="@style/Theme.AppStarting">
-    <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-    </intent-filter>
-</activity>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
