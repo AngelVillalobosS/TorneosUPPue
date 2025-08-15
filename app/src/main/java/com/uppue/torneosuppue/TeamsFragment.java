@@ -4,18 +4,19 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TeamsFragment extends Fragment {
 
-    private ListView listView;
+    private RecyclerView recyclerView;
     private TeamsAdapter adapter;
     private List<Team> teamList;
 
@@ -25,24 +26,34 @@ public class TeamsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_teams, container, false);
-        listView = view.findViewById(R.id.teams_list_view); // Asegúrate de tener este ID en tu XML
+        recyclerView = view.findViewById(R.id.teams_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        // Lista inicial de equipos (puede venir de Firestore u otra fuente)
         teamList = new ArrayList<>();
         teamList.add(new Team("Ingeniería en Sistemas", true, new ArrayList<>(), "Fútbol", R.drawable.logo_sistemas));
         teamList.add(new Team("Administración", false, new ArrayList<>(), "Básquetbol", R.drawable.logo_admin));
-        // Agrega más equipos si es necesario
 
-        // Crear el adaptador y asignarlo al ListView
-        adapter = new TeamsAdapter(requireContext(), teamList, new TeamsAdapter.OnTeamStatusChangeListener() {
-            @Override
-            public void onStatusChange(Team team, boolean newStatus) {
-                team.setActive(newStatus);
-                // Aquí podrías guardar el nuevo estado en Firestore si lo deseas
-            }
-        });
+        adapter = new TeamsAdapter(requireContext(), teamList,
+                new TeamsAdapter.OnTeamStatusChangeListener() {
+                    @Override
+                    public void onStatusChange(Team team, boolean newStatus) {
+                        team.setActive(newStatus);
+                    }
+                },
+                new TeamsAdapter.OnTeamClickListener() {
+                    @Override
+                    public void onTeamClick(Team team) {
+                        // Navegar al detalle del equipo
+                        TeamDetailFragment teamDetailFragment = TeamDetailFragment.newInstance(team);
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, teamDetailFragment)
+                                .addToBackStack(null)
+                                .commit();
+                    }
+                }
+        );
 
-        listView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
         return view;
     }

@@ -190,8 +190,8 @@ public class LoginActivity extends AppCompatActivity {
                             Log.e("DEBUG", "Documento de usuario no encontrado");
                             mAuth.signOut();
                         }
-                        handleRoleNotFound();
                     } else {
+                        handleRoleNotFound();
                         handleFirestoreError(task.getException());
                     }
                 });

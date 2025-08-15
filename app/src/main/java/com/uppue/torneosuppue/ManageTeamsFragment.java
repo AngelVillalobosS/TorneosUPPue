@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -36,18 +37,12 @@ public class ManageTeamsFragment extends Fragment {
         // Inicializar adaptador con los 3 parámetros requeridos
         adapter = new TeamsAdapter(
                 requireContext(),
-                teamList,
-                new TeamsAdapter.OnTeamStatusChangeListener() {
-                    @Override
-                    public void onStatusChange(Team team, boolean newStatus) {
-                        toggleTeamStatus(team, newStatus);
-                    }
-                }
+                teamList, (TeamsAdapter.OnTeamStatusChangeListener) this, (TeamsAdapter.OnTeamClickListener) this
         );
 
 
 
-        listView.setAdapter(adapter);
+        listView.setAdapter((ListAdapter) adapter);
         loadTeams();
         return view;
     }
@@ -66,6 +61,17 @@ public class ManageTeamsFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 });
     }
+
+    // Implementa el método para clics en equipos
+    public void onTeamClick(Team team) {
+        // Navegar al detalle del equipo
+        TeamDetailFragment teamDetailFragment = TeamDetailFragment.newInstance(team);
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, teamDetailFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
 
     private void toggleTeamStatus(Team team, boolean newStatus) {
         // Actualizar Firestore

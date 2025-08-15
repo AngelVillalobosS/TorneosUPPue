@@ -16,6 +16,9 @@
         android:theme="@style/Theme.TorneosUPPue"
         tools:targetApi="33">
         <activity
+            android:name=".adminview.MainActivity"
+            android:exported="false" />
+        <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.AppStarting">
